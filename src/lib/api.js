@@ -1,158 +1,90 @@
-import { supabase } from './supabase'
-import * as localDb from './localStorageDb'
+const BASE_URL = 'http://localhost:8080/api';
 
-// Check if Supabase env credentials are configured and not placeholders
-const isSupabaseConfigured = (() => {
-  try {
-    const url = import.meta.env.VITE_SUPABASE_URL;
-    const key = import.meta.env.VITE_SUPABASE_ANON_KEY;
-    return url && url !== 'YOUR_SUPABASE_URL' && url.trim() !== '' &&
-           key && key !== 'YOUR_SUPABASE_ANON_KEY' && key.trim() !== '';
-  } catch (e) {
-    return false;
+async function request(path, options = {}) {
+  const url = `${BASE_URL}${path}`;
+  const response = await fetch(url, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...options.headers,
+    },
+  });
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
   }
-})();
+  return response.json();
+}
 
 export async function fetchBooks() {
-  if (!isSupabaseConfigured) {
-    return localDb.dbFetchBooks();
-  }
-  const { data, error } = await supabase.from('books').select('*').order('book_id')
-  if (error) throw error
-  return data
+  return request('/books');
 }
 
 export async function fetchMembers() {
-  if (!isSupabaseConfigured) {
-    return localDb.dbFetchMembers();
-  }
-  const { data, error } = await supabase.from('members').select('*').order('member_id')
-  if (error) throw error
-  return data
+  return request('/members');
 }
 
 export async function fetchTransactions() {
-  if (!isSupabaseConfigured) {
-    return localDb.dbFetchTransactions();
-  }
-  const { data, error } = await supabase.from('transactions').select('*').order('transaction_id', { ascending: false })
-  if (error) throw error
-  return data
+  return request('/transactions');
 }
 
 export async function fetchMemberTransactions(memberId) {
-  if (!isSupabaseConfigured) {
-    return localDb.dbFetchMemberTransactions(memberId);
-  }
-  const { data, error } = await supabase
-    .from('transactions')
-    .select('*')
-    .eq('member_id', memberId)
-    .order('transaction_id', { ascending: false })
-  if (error) throw error
-  return data
+  return request(`/transactions?memberId=${memberId}`);
 }
 
 export async function addBook(book) {
-  if (!isSupabaseConfigured) {
-    return localDb.dbAddBook(book);
-  }
-  const { data, error } = await supabase.from('books').insert(book).select().single()
-  if (error) throw error
-  return data
+  return request('/books', {
+    method: 'POST',
+    body: JSON.stringify(book),
+  });
 }
 
 export async function updateBook(bookId, updates) {
-  if (!isSupabaseConfigured) {
-    return localDb.dbUpdateBook(bookId, updates);
-  }
-  const { data, error } = await supabase.from('books').update(updates).eq('book_id', bookId).select().single()
-  if (error) throw error
-  return data
+  return request(`/books?id=${bookId}`, {
+    method: 'PUT',
+    body: JSON.stringify(updates),
+  });
 }
 
 export async function deleteBook(bookId) {
-  if (!isSupabaseConfigured) {
-    return localDb.dbDeleteBook(bookId);
-  }
-  const { error } = await supabase.from('books').delete().eq('book_id', bookId)
-  if (error) throw error
+  return request(`/books?id=${bookId}`, {
+    method: 'DELETE',
+  });
 }
 
 export async function addMember(member) {
-  if (!isSupabaseConfigured) {
-    return localDb.dbAddMember(member);
-  }
-  const { data, error } = await supabase.from('members').insert(member).select().single()
-  if (error) throw error
-  return data
+  return request('/members', {
+    method: 'POST',
+    body: JSON.stringify(member),
+  });
 }
 
 export async function updateMember(memberId, updates) {
-  if (!isSupabaseConfigured) {
-    return localDb.dbUpdateMember(memberId, updates);
-  }
-  const { data, error } = await supabase.from('members').update(updates).eq('member_id', memberId).select().single()
-  if (error) throw error
-  return data
+  return request(`/members?id=${memberId}`, {
+    method: 'PUT',
+    body: JSON.stringify(updates),
+  });
 }
 
 export async function deleteMember(memberId) {
-  if (!isSupabaseConfigured) {
-    return localDb.dbDeleteMember(memberId);
-  }
-  const { error } = await supabase.from('members').delete().eq('member_id', memberId)
-  if (error) throw error
+  return request(`/members?id=${memberId}`, {
+    method: 'DELETE',
+  });
 }
 
 export async function issueBookTx(memberId, bookId) {
-  if (!isSupabaseConfigured) {
-    return localDb.dbIssueBookTx(memberId, bookId);
-  }
-  const today = new Date()
-  const due = new Date(today)
-  due.setDate(due.getDate() + 14)
-
-  const { data: tx, error: txError } = await supabase.from('transactions').insert({
-    member_id: memberId,
-    book_id: bookId,
-    issue_date: today.toISOString().slice(0, 10),
-    due_date: due.toISOString().slice(0, 10),
-    status: 'ISSUED',
-  }).select().single()
-  if (txError) throw txError
-
-  const { data: book } = await supabase.from('books').select('available_copies').eq('book_id', bookId).single()
-  if (book && book.available_copies > 0) {
-    await supabase.from('books').update({ available_copies: book.available_copies - 1 }).eq('book_id', bookId)
-  }
-
-  return tx
+  return request('/transactions/issue', {
+    method: 'POST',
+    body: JSON.stringify({
+      member_id: memberId,
+      book_id: bookId,
+    }),
+  });
 }
 
 export async function returnBookTx(transactionId) {
-  if (!isSupabaseConfigured) {
-    return localDb.dbReturnBookTx(transactionId);
-  }
-  const today = new Date().toISOString().slice(0, 10)
-
-  const { data: tx, error: txError } = await supabase
-    .from('transactions')
-    .select('*')
-    .eq('transaction_id', transactionId)
-    .single()
-  if (txError) throw txError
-
-  const { error: updateError } = await supabase
-    .from('transactions')
-    .update({ return_date: today, status: 'RETURNED' })
-    .eq('transaction_id', transactionId)
-  if (updateError) throw updateError
-
-  const { data: book } = await supabase.from('books').select('available_copies, total_copies').eq('book_id', tx.book_id).single()
-  if (book && book.available_copies < book.total_copies) {
-    await supabase.from('books').update({ available_copies: book.available_copies + 1 }).eq('book_id', tx.book_id)
-  }
-
-  return { ...tx, return_date: today, status: 'RETURNED' }
+  return request(`/transactions/return?id=${transactionId}`, {
+    method: 'POST',
+    body: JSON.stringify({}),
+  });
 }

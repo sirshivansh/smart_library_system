@@ -65,6 +65,9 @@ public class Dashboard {
         System.out.println(CYAN + "\n  Initializing Smart Library Management System..." + RESET);
         DbConnection.initializeDatabase();
 
+        // Start Embedded HTTP Web Server for Frontend Integration
+        com.shivansh.org.api.LibraryHttpServer.startServer();
+
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         int mainOption = 0;
 
@@ -84,6 +87,7 @@ public class Dashboard {
                 case 2: handleMemberLogin(br); break;
                 case 3: handleMemberRegistration(br); break;
                 case 4:
+                    com.shivansh.org.api.LibraryHttpServer.stopServer();
                     System.out.println(GREEN_BOLD + "\n  ✓ Thank you for using Book Haven Smart Library. Goodbye!\n" + RESET);
                     break;
             }
