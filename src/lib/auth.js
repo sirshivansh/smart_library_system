@@ -1,4 +1,17 @@
 import { supabase } from './supabase'
+import * as localDb from './localStorageDb'
+
+// Check if Supabase env credentials are configured and not placeholders
+const isSupabaseConfigured = (() => {
+  try {
+    const url = import.meta.env.VITE_SUPABASE_URL;
+    const key = import.meta.env.VITE_SUPABASE_ANON_KEY;
+    return url && url !== 'YOUR_SUPABASE_URL' && url.trim() !== '' &&
+           key && key !== 'YOUR_SUPABASE_ANON_KEY' && key.trim() !== '';
+  } catch (e) {
+    return false;
+  }
+})();
 
 // Admin credentials are hardcoded (matching the original Java app)
 const ADMIN_USER = 'admin'
@@ -14,14 +27,22 @@ export async function login(emailOrUsername, password) {
     }
   }
 
-  // Otherwise check members via email
-  const { data: member, error } = await supabase
-    .from('members')
-    .select('*')
-    .eq('email', emailOrUsername)
-    .maybeSingle()
+  let member = null;
 
-  if (error) throw error
+  if (!isSupabaseConfigured) {
+    member = localDb.dbLogin(emailOrUsername, password);
+  } else {
+    // Otherwise check members via email
+    const { data, error } = await supabase
+      .from('members')
+      .select('*')
+      .eq('email', emailOrUsername)
+      .maybeSingle()
+
+    if (error) throw error
+    member = data;
+  }
+
   if (!member) return null
 
   // For the demo, we accept the plaintext password 'password123' for seeded members

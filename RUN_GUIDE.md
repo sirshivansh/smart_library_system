@@ -55,6 +55,21 @@ mvn test
 
 ---
 
+### Step 5: Run the Web User Interface (React / Vite)
+A premium, dark-mode React frontend has been integrated. You can run it locally on your PC out of the box (uses automatic `localStorage` database fallback if Supabase is not configured):
+
+1. Install the required Node packages:
+   ```bash
+   npm install
+   ```
+2. Start the local Vite development server:
+   ```bash
+   npm run dev
+   ```
+3. Open the browser link provided in the terminal output (e.g. `http://localhost:5173`).
+
+---
+
 ## 🔑 Default Credentials
 
 Once the dashboard is running, use these accounts to sign in:

@@ -1,24 +1,49 @@
 import { supabase } from './supabase'
+import * as localDb from './localStorageDb'
+
+// Check if Supabase env credentials are configured and not placeholders
+const isSupabaseConfigured = (() => {
+  try {
+    const url = import.meta.env.VITE_SUPABASE_URL;
+    const key = import.meta.env.VITE_SUPABASE_ANON_KEY;
+    return url && url !== 'YOUR_SUPABASE_URL' && url.trim() !== '' &&
+           key && key !== 'YOUR_SUPABASE_ANON_KEY' && key.trim() !== '';
+  } catch (e) {
+    return false;
+  }
+})();
 
 export async function fetchBooks() {
+  if (!isSupabaseConfigured) {
+    return localDb.dbFetchBooks();
+  }
   const { data, error } = await supabase.from('books').select('*').order('book_id')
   if (error) throw error
   return data
 }
 
 export async function fetchMembers() {
+  if (!isSupabaseConfigured) {
+    return localDb.dbFetchMembers();
+  }
   const { data, error } = await supabase.from('members').select('*').order('member_id')
   if (error) throw error
   return data
 }
 
 export async function fetchTransactions() {
+  if (!isSupabaseConfigured) {
+    return localDb.dbFetchTransactions();
+  }
   const { data, error } = await supabase.from('transactions').select('*').order('transaction_id', { ascending: false })
   if (error) throw error
   return data
 }
 
 export async function fetchMemberTransactions(memberId) {
+  if (!isSupabaseConfigured) {
+    return localDb.dbFetchMemberTransactions(memberId);
+  }
   const { data, error } = await supabase
     .from('transactions')
     .select('*')
@@ -29,40 +54,61 @@ export async function fetchMemberTransactions(memberId) {
 }
 
 export async function addBook(book) {
+  if (!isSupabaseConfigured) {
+    return localDb.dbAddBook(book);
+  }
   const { data, error } = await supabase.from('books').insert(book).select().single()
   if (error) throw error
   return data
 }
 
 export async function updateBook(bookId, updates) {
+  if (!isSupabaseConfigured) {
+    return localDb.dbUpdateBook(bookId, updates);
+  }
   const { data, error } = await supabase.from('books').update(updates).eq('book_id', bookId).select().single()
   if (error) throw error
   return data
 }
 
 export async function deleteBook(bookId) {
+  if (!isSupabaseConfigured) {
+    return localDb.dbDeleteBook(bookId);
+  }
   const { error } = await supabase.from('books').delete().eq('book_id', bookId)
   if (error) throw error
 }
 
 export async function addMember(member) {
+  if (!isSupabaseConfigured) {
+    return localDb.dbAddMember(member);
+  }
   const { data, error } = await supabase.from('members').insert(member).select().single()
   if (error) throw error
   return data
 }
 
 export async function updateMember(memberId, updates) {
+  if (!isSupabaseConfigured) {
+    return localDb.dbUpdateMember(memberId, updates);
+  }
   const { data, error } = await supabase.from('members').update(updates).eq('member_id', memberId).select().single()
   if (error) throw error
   return data
 }
 
 export async function deleteMember(memberId) {
+  if (!isSupabaseConfigured) {
+    return localDb.dbDeleteMember(memberId);
+  }
   const { error } = await supabase.from('members').delete().eq('member_id', memberId)
   if (error) throw error
 }
 
 export async function issueBookTx(memberId, bookId) {
+  if (!isSupabaseConfigured) {
+    return localDb.dbIssueBookTx(memberId, bookId);
+  }
   const today = new Date()
   const due = new Date(today)
   due.setDate(due.getDate() + 14)
@@ -85,6 +131,9 @@ export async function issueBookTx(memberId, bookId) {
 }
 
 export async function returnBookTx(transactionId) {
+  if (!isSupabaseConfigured) {
+    return localDb.dbReturnBookTx(transactionId);
+  }
   const today = new Date().toISOString().slice(0, 10)
 
   const { data: tx, error: txError } = await supabase
