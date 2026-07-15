@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Book Haven — Member Portal</title>
+  <meta name="description" content="Member portal for Book Haven Smart Library System" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div class="bg-orbs">
+    <div class="orb orb-1" style="background:#10B981;"></div>
+    <div class="orb orb-2" style="background:#6366F1;"></div>
+  </div>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <a class="navbar-brand" href="index.html">
+      <div class="brand-icon">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width:20px;height:20px;color:white;">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+        </svg>
+      </div>
+      <div>
+        <div class="brand-name">Book Haven</div>
+        <div class="brand-sub">Member Portal</div>
+      </div>
+    </a>
+    <div class="nav-tabs">
+      <button class="nav-tab active" id="tab-browse" onclick="switchTab('browse')">🔍 Browse Books</button>
+      <button class="nav-tab" id="tab-borrowed" onclick="switchTab('borrowed')">📖 My Books</button>
+      <button class="nav-tab" id="tab-profile" onclick="switchTab('profile')">👤 Profile</button>
+    </div>
+    <div class="nav-user">
+      <div class="user-avatar" id="user-avatar" style="background:linear-gradient(135deg,#10B981,#6366F1);">S</div>
+      <div>
+        <div class="user-name" id="user-name">Member</div>
+        <div style="font-size:10px;color:var(--text-dim);">Student</div>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="logout()">Logout</button>
+    </div>
+  </nav>
+
+  <!-- MOBILE TAB BAR -->
+  <div style="display:flex;gap:0;background:var(--bg-surface);border-bottom:1px solid var(--border);overflow-x:auto;padding:0 12px;">
+    <button class="nav-tab active" id="mob-tab-browse"    onclick="switchTab('browse')"   style="flex-shrink:0;border-radius:0;padding:12px 14px;">Browse</button>
+    <button class="nav-tab"        id="mob-tab-borrowed" onclick="switchTab('borrowed')" style="flex-shrink:0;border-radius:0;padding:12px 14px;">My Books</button>
+    <button class="nav-tab"        id="mob-tab-profile"  onclick="switchTab('profile')"  style="flex-shrink:0;border-radius:0;padding:12px 14px;">Profile</button>
+  </div>
+
+  <div class="app-container">
+    <div class="main-content">
+
+      <!-- ═══════ BROWSE TAB ═══════ -->
+      <div id="panel-browse" class="tab-panel active">
+        <div class="section-header mb-16">
+          <div>
+            <div style="font-size:22px;font-weight:800;margin-bottom:4px;">Browse Books</div>
+            <div style="color:var(--text-dim);font-size:14px;" id="browse-count">Loading catalog...</div>
+          </div>
+          <div class="search-bar">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            <input class="input-field" type="text" id="browse-search" placeholder="Search by title, author, genre..." oninput="renderBrowse()" style="width:260px;" />
+          </div>
+        </div>
+        <div id="book-grid" class="book-grid">
+          <div class="loading" style="grid-column:1/-1;"><div class="spinner"></div> Loading books...</div>
+        </div>
+      </div>
+
+      <!-- ═══════ MY BOOKS TAB ═══════ -->
+      <div id="panel-borrowed" class="tab-panel">
+        <div class="mb-24">
+          <div style="font-size:22px;font-weight:800;margin-bottom:4px;">My Books</div>
+          <div style="color:var(--text-dim);font-size:14px;">Currently borrowed and reading history</div>
+        </div>
+
+        <div class="section-header" style="margin-bottom:12px;">
+          <div class="section-title">📖 Currently Borrowing</div>
+        </div>
+        <div id="active-borrows" class="glass-card mb-24">
+          <div class="loading"><div class="spinner"></div></div>
+        </div>
+
+        <div class="section-header" style="margin-bottom:12px;">
+          <div class="section-title">🕒 Borrow History</div>
+        </div>
+        <div id="borrow-history" class="glass-card">
+          <div class="loading"><div class="spinner"></div></div>
+        </div>
+      </div>
+
+      <!-- ═══════ PROFILE TAB ═══════ -->
+      <div id="panel-profile" class="tab-panel">
+        <div class="mb-24">
+          <div style="font-size:22px;font-weight:800;margin-bottom:4px;">My Profile</div>
+          <div style="color:var(--text-dim);font-size:14px;">Your membership information</div>
+        </div>
+        <div id="profile-card" class="glass-card glow-border" style="padding:28px;max-width:560px;">
+          <div class="loading"><div class="spinner"></div></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- BORROW CONFIRM MODAL -->
+  <div id="borrow-modal" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-title">📖 Borrow Book</div>
+      <p style="color:var(--text-muted);margin-bottom:16px;font-size:14px;">You are about to borrow the following book. The due date will be 14 days from today.</p>
+      <div class="glass-card" style="padding:16px;margin-bottom:4px;">
+        <div style="font-size:14px;font-weight:700;color:var(--text-primary);margin-bottom:2px;" id="borrow-book-title">—</div>
+        <div style="font-size:12px;color:var(--text-dim);" id="borrow-book-author">—</div>
+      </div>
+      <div style="font-size:12px;color:var(--text-dim);margin-bottom:20px;margin-top:8px;">Fine: ₹5.00 per day for late returns</div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" onclick="closeModal('borrow-modal')">Cancel</button>
+        <button type="button" class="btn btn-primary" id="confirm-borrow-btn" onclick="confirmBorrow()">Confirm Borrow</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/member.js"></script>
+</body>
+</html>
