@@ -14,6 +14,7 @@ import com.shivansh.org.controller.TransactionController;
 import com.shivansh.org.dto.Book;
 import com.shivansh.org.dto.Member;
 import com.shivansh.org.dto.Transaction;
+import com.shivansh.org.util.DbConnection;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -50,6 +51,7 @@ public class LibraryHttpServer {
             server.createContext("/api/books", new BooksHandler());
             server.createContext("/api/members", new MembersHandler());
             server.createContext("/api/transactions", new TransactionsHandler());
+            server.createContext("/api/setup-db", new SetupDbHandler());
 
             server.setExecutor(java.util.concurrent.Executors.newCachedThreadPool());
             server.start();
@@ -362,6 +364,24 @@ public class LibraryHttpServer {
                 } else {
                     sendResponse(exchange, 405, "{\"error\":\"Method Not Allowed\"}");
                 }
+            } catch (Exception e) {
+                sendResponse(exchange, 500, "{\"error\":\"" + e.getMessage() + "\"}");
+            }
+        }
+    // ── 5. SETUP DB HANDLER ────────────────────────────────────────
+    private static class SetupDbHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            if (handleOptions(exchange)) return;
+
+            if (!"POST".equalsIgnoreCase(exchange.getRequestMethod())) {
+                sendResponse(exchange, 405, "{\"error\":\"Method Not Allowed\"}");
+                return;
+            }
+
+            try {
+                DbConnection.initializeDatabase();
+                sendResponse(exchange, 200, "{\"success\":true,\"message\":\"Database initialized successfully.\"}");
             } catch (Exception e) {
                 sendResponse(exchange, 500, "{\"error\":\"" + e.getMessage() + "\"}");
             }

@@ -43,6 +43,8 @@ const api = {
   login: (email, password) => request('/login', {
     method: 'POST', body: JSON.stringify({ email, password })
   }),
+
+  setupDb: () => request('/setup-db', { method: 'POST' }),
 };
 
 // ── Fine Calculation ──────────────────────────────────────────────

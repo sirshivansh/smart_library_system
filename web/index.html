@@ -61,7 +61,7 @@
           <!-- Quick fill buttons -->
           <div style="margin-top:4px;">
             <p style="font-size:11px;color:var(--text-dim);text-align:center;margin-bottom:10px;margin-top:18px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Quick Demo Access</p>
-            <div class="quick-fill">
+            <div class="quick-fill" style="margin-top:0; padding-top:0; border:none;">
               <button class="quick-btn" onclick="fillCredentials('admin')">
                 <div class="quick-btn-role role-admin">👑 Admin</div>
                 <div class="quick-btn-cred">admin / 123</div>
@@ -69,6 +69,12 @@
               <button class="quick-btn" onclick="fillCredentials('member')">
                 <div class="quick-btn-role role-member">🎓 Member</div>
                 <div class="quick-btn-cred">Student account</div>
+              </button>
+            </div>
+            
+            <div style="margin-top:20px; padding-top:20px; border-top:1px solid var(--border); text-align:center;">
+              <button id="setup-db-btn" class="btn btn-ghost btn-sm" onclick="setupDatabase()" style="font-size:11px; padding:6px 12px;">
+                ⚙️ Initialize / Reset Database
               </button>
             </div>
           </div>
@@ -129,6 +135,21 @@
         spinner.style.display = 'none';
       }
     });
+
+    async function setupDatabase() {
+      const btn = document.getElementById('setup-db-btn');
+      btn.disabled = true;
+      btn.textContent = 'Running Setup...';
+      try {
+        await api.setupDb();
+        alert('Database checked/initialized successfully! Please check the Java terminal for logs.');
+      } catch (err) {
+        alert('Error: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '⚙️ Initialize / Reset Database';
+      }
+    }
   </script>
 </body>
 </html>
