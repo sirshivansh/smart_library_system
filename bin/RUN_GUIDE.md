@@ -53,7 +53,18 @@ To run the expanded JUnit test suite (validating SHA-256 password hashing, valid
 mvn test
 ```
 
+---
 
+### Step 5: Open the Web User Interface (HTML/CSS/JS)
+A premium, dark-mode frontend has been built in pure HTML/CSS/JS. It connects directly to the Java backend via the embedded REST API on port `8080`.
+
+**No Node.js, `npm`, or build tools are required!**
+
+1.  Make sure the Java application is running (`mvn exec:java`).
+2.  Open the `web/index.html` file directly in your web browser.
+3.  Log in using the default credentials below.
+
+---
 
 ## 🔑 Default Credentials
 
